@@ -4,12 +4,13 @@ import java.net.DatagramSocket;
 
 public class Main {
   public static void main(String[] args){
-    int portNumber = 2053;
-    try(DatagramSocket serverSocket = new DatagramSocket(portNumber)) {
+    int portUDPNumber = 2053;
+    try(
+      DatagramSocket serverSocket = new DatagramSocket(portUDPNumber)
+    ) {
 
-      while(true) {
-
-        final byte[] buf = new byte[512];
+      while (true) {
+        final byte[] buf = new byte[512]; // maximum 512 byte for a packet
 
         final DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
@@ -22,7 +23,6 @@ public class Main {
         final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
 
         serverSocket.send(packetResponse);
-
       }
 
     } catch (IOException e) {
