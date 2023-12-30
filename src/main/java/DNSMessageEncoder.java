@@ -13,7 +13,7 @@ public class DNSMessageEncoder {
         return result;
     }
 
-    private static void encodeHeaderSection(ByteBuffer byteBuffer, DNSSectionHeader header) {
+    private static void encodeHeaderSection(ByteBuffer byteBuffer, DNSHeaderSection header) {
         byteBuffer.putShort((short) header.packetIdentifier());
         int byteToStore = header.queryOrResponse().value << 7;
         byteToStore |= (header.operationCode() << 3);
@@ -47,8 +47,8 @@ public class DNSMessageEncoder {
         byteBuffer.put((byte) 0);
     }
 
-    private static void encodeAnswerSection(ByteBuffer byteBuffer, DNSSectionAnswer answer) {
-        for (DNSSectionAnswer.DNSRecord record : answer.records()) {
+    private static void encodeAnswerSection(ByteBuffer byteBuffer, DNSAnswerSection answer) {
+        for (DNSAnswerSection.DNSRecord record : answer.records()) {
             encodeLabels(byteBuffer, record.name());
             byteBuffer.putShort((short) record.dataType().value);
             byteBuffer.putShort((short) record.dataClass().value);
