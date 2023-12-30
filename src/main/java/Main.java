@@ -2,73 +2,69 @@ import java.io.IOException;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
-import java.nio.ByteBuffer;
-
-import java.util.List;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
-  public static void main(String[] args){
-    final int PORT_UDP = 2053;
-    final short SHORT_ZERO = (short)0;
-    final byte BYTE_ZERO = (byte)0;
+    public static void main(String[] args) {
+        final InetSocketAddress forwardAddress = retrieveForwardAddress(args);
 
-    try(
-      DatagramSocket serverSocket = new DatagramSocket(PORT_UDP)
-    ) {
-      while (true) {
-        final byte[] buf = new byte[512]; // maximum 512 byte for a packet
+        try (final DatagramSocket serverSocket = new DatagramSocket(2053)) {
+            serverSocket.setReuseAddress(true);
+            while(true) {
+                final byte[] buf = new byte[512];
+                final DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                serverSocket.receive(packet);
 
-        final DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                final DNSMessage questionMessage = DNSMessageDecoder.decode(buf);
+                System.out.println("OriginalRequest(" + packet.getSocketAddress() + ") : " + questionMessage);
 
-        serverSocket.receive(packet);
+                final DNSResponseRetriever responseRetriever = createDNSResponseRetriever(forwardAddress, serverSocket);
+                final DNSMessage responseMessage = responseRetriever.getResponseMessage(questionMessage);
+                System.out.println("FinalResponse(" + packet.getSocketAddress() + ") : " + responseMessage);
 
-        System.out.println("Received data " + packet);
-
-        DNSHeader header = new DNSHeader();
-
-        header.setID((short)1234);
-        header.setQR(true);
-        header.setQDCOUNT((short)1);
-
-        DNSQuestion questions = new DNSQuestion(
-          "codecrafters.io", DNSQuestionType.A.getValue(),
-          DNSQuestionClass.IN.getValue()
-        );
-
-        DNSMessage message = new DNSMessage(header, questions);
-
-        final byte[] bufResponse = message.toBytes();
-
-        DatagramPacket responsePacket = new DatagramPacket(
-          bufResponse, bufResponse.length,
-          packet.getAddress(), packet.getPort()
-        );
-
-        serverSocket.send(responsePacket);
-
-        System.out.println("Sent data " + responsePacket);
-
-        // final var header = new DNSHeader(
-        //   (short)1234, true, BYTE_ZERO, false, false, false, false, BYTE_ZERO,
-        //   RCode.NO_ERROR, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO
-        // );
-
-        // final var questions = new DNSQuestion("codecrafters.io",
-        //     DNSQuestionType.A.getValue(), DNSQuestionClass.IN.getValue());
-
-        // final var message = new DNSMessage(header.get(), questions);
-
-        // final byte[] bufResponse = message.array();
-
-        // final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
-
-        // serverSocket.send(packetResponse);
-      }
-    } catch (IOException e) {
-        System.out.println("IOException: " + e.getMessage());
+                byte[] bufResponse = DNSMessageEncoder.encode(responseMessage);
+                DatagramPacket responsePacket = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
+                serverSocket.send(responsePacket);
+            }
+        } catch (IOException e) {
+            System.out.println("IOException: " + e.getMessage());
+        }
     }
-  }
+
+    private static InetSocketAddress retrieveForwardAddress(String[] args) {
+        Map<String, String> arguments = parseArgs(args);
+        System.out.println("Arguments = " + arguments);
+        if (arguments.containsKey("--resolver")) {
+            String[] resolverAddress = arguments.get("--resolver").split(":");
+            return new InetSocketAddress(
+                resolverAddress[0],
+                Integer.parseInt(resolverAddress[1])
+            );
+        }
+        return null;
+    }
+
+    private static Map<String, String> parseArgs(String[] args) {
+        Map<String, String> arguments = new HashMap<>();
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].startsWith("-")) {
+                arguments.put(args[i], args[i + 1]);
+                i++;
+            } else {
+                arguments.put(args[i], "");
+            }
+        }
+        return arguments;
+    }
+
+    private static DNSResponseRetriever createDNSResponseRetriever(InetSocketAddress forwardAddress, DatagramSocket serverSocket) {
+        if (forwardAddress != null) {
+            return new ForwardedDNSResponse(serverSocket, forwardAddress);
+        } else {
+            return new SimpleDNSResponse();
+        }
+    }
 }
