@@ -1,68 +1,46 @@
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
-public class DNSMessage {
-    private DNSHeader header;
-    private int questionCount;
-    private int answerCount;
-    private int authorityCount;
-    private int additionalCount;
-    private List<DNSQuestion> questions = new ArrayList<>();
-    private DNSQuestion question;
+public record DNSMessage(
+    DNSHeaderSection header,
+    DNSSectionQuestion question,
+    DNSAnswerSection answer
+) {
+    public enum Type {
+        A(1),
+        CNAME(5);
+        public final int value;
 
-    public DNSMessage(DNSHeader header, DNSQuestion question) {
-        this.header = header;
-        this.question = question;
-        addQuestion(question);
+        Type(int value) {
+            this.value = value;
+        }
+
+        public static Optional<Type> fromValue(int value) {
+            return Arrays.stream(values())
+                .filter(type -> type.value == value)
+                .findFirst();
+        }
     }
 
-    public byte[] toBytes() {
-        ByteBuffer buffer = ByteBuffer.allocate(512);
+    public enum ClassType {
+        INTERNET(1),
+        CSNET(2),
+        CHAOS(3),
+        HESIOD(4);
+        public final int value;
 
-        buffer.put(header.toBytes());
-        buffer.put(question.toBytes());
+        ClassType(int value) {
+            this.value = value;
+        }
 
-        return buffer.array();
+        public static Optional<ClassType> fromValue(int value) {
+            return Arrays.stream(values())
+                .filter(type -> type.value == value)
+                .findFirst();
+        }
     }
 
-    public void addQuestion(DNSQuestion question) {
-        this.questions.add(question);
-        ++this.questionCount;
+    public boolean isStandardQuery() {
+        return header().operationCode() == 0;
     }
-
-    public static DNSMessage parseFromBuffer(byte[] data) {
-        ByteBuffer buffer = ByteBuffer.wrap(data);
-
-        short[] h = new short[6];
-
-        buffer.order(ByteOrder.BIG_ENDIAN).asShortBuffer().get(h);
-
-        DNSHeader dnsHeader = new DNSHeader();
-
-        dnsHeader.setHeader(h);
-
-        DNSHeader header = dnsHeader.getHeader();
-
-        DNSQuestion dnsQuestion = DNSQuestion.parse(buffer);
-
-        int questionCount = buffer.getShort(),
-            answerCount = buffer.getShort(),
-            authorityCount = buffer.getShort(),
-            additionalCount = buffer.getShort();
-
-        DNSMessage dnsMessage = new DNSMessage(header, dnsQuestion);
-
-        return dnsMessage;
-    }
-
-//   @Override
-//   public String toString() {
-//     return "DNSMessage{"
-//         + "header=" + header + ", questionCount=" + questionCount +
-//         ", answerCount=" + answerCount + ", authorityCount=" + authorityCount +
-//         ", additionalCount=" + additionalCount + ", question=" + question + '}';
-//   }
 }
