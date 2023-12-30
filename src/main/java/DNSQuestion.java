@@ -6,10 +6,8 @@ public record DNSQuestion(String domainName,
             short questionType, short questionClass) {
 
     public static DNSQuestion parse(ByteBuffer buffer) {
-        // ByteBuffer buffer = ByteBuffer.wrap(data, offset, data.length - offset);
         StringBuilder domainBuilder = new StringBuilder();
         byte labelLength;
-        // short questionNr = DNSHeader.getQDCOUNT();
 
         while ((labelLength = buffer.get()) > 0) {
             if (!domainBuilder.isEmpty()) {
