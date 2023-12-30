@@ -8,6 +8,5 @@ public enum DNSQuestionClass {
     final short value;
 
     DNSQuestionClass(short value) { this.value = value; }
-
     public short getValue() { return value; }
 }

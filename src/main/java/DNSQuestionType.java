@@ -23,6 +23,5 @@ public enum DNSQuestionType {
     private final short value;
 
     DNSQuestionType(short value) { this.value = value; }
-
     public short getValue() { return value; }
 }

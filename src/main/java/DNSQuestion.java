@@ -48,7 +48,6 @@ public record DNSQuestion(String domainName,
             outputStream.write((byte)label.length());
             outputStream.writeBytes(label.getBytes(StandardCharsets.UTF_8));
         }
-
         outputStream.write(0); // Terminating null byte
 
         return outputStream.toByteArray();
