@@ -31,7 +31,7 @@ public record DNSQuestion(String domainName,
         return new DNSQuestion(domainBuilder.toString(), qType, qClass);
     }
 
-    public ByteBuffer get() {
+    public byte[] toBytes() {
         byte[] domainBytes = encodeDomainName(domainName);
 
         ByteBuffer buffer = ByteBuffer.allocate(domainBytes.length + 4);
@@ -40,7 +40,7 @@ public record DNSQuestion(String domainName,
         buffer.putShort((short)questionType);
         buffer.putShort((short)questionClass);
 
-        return buffer;
+        return buffer.array();
     }
 
     public byte[] encodeDomainName(String domain) {
