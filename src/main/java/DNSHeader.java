@@ -10,7 +10,7 @@ public record DNSHeader(
   private static final int BUFFER_CAPACITY = 12;
   private static final int FLAG_BITS_CAPACITY = 8;
 
-  public ByteBuffer getHeader() {
+  public ByteBuffer get() {
     ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CAPACITY);
 
     BitSet flags = new BitSet(FLAG_BITS_CAPACITY);
