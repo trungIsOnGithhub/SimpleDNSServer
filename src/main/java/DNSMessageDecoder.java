@@ -9,14 +9,14 @@ public class DNSMessageDecoder {
 
     public static DNSMessage decode(byte[] buffer) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-        DNSSectionHeader header = decodeHeader(byteBuffer);
+        DNSHeaderSection header = decodeHeader(byteBuffer);
         DNSSectionQuestion question = decodeQuestion(byteBuffer, header.questionCount());
-        DNSSectionAnswer answer = decodeAnswer(byteBuffer, header.answerCount());
+        DNSAnswerSection answer = decodeAnswer(byteBuffer, header.answerCount());
 
         return new DNSMessage(header, question, answer);
     }
 
-    private static DNSSectionHeader decodeHeader(ByteBuffer byteBuffer) {
+    private static DNSHeaderSection decodeHeader(ByteBuffer byteBuffer) {
         final int packetIdentifier = byteBuffer.getShort() & 0xFFFF;
         byte firstBitMask = byteBuffer.get();
         final int questionOrReponse = (firstBitMask >> 7) & 1;
@@ -33,9 +33,9 @@ public class DNSMessageDecoder {
         final int nameserverCount = byteBuffer.getShort();
         final int additionalRecordCount = byteBuffer.getShort();
 
-        return new DNSSectionHeader(
+        return new DNSHeaderSection(
             packetIdentifier,
-            DNSSectionHeader.QueryOrResponse.fromValue(questionOrReponse).orElseThrow(),
+            DNSHeaderSection.QueryOrResponse.fromValue(questionOrReponse).orElseThrow(),
             operationCode,
             authoritativeAnswer,
             truncation,
@@ -66,8 +66,8 @@ public class DNSMessageDecoder {
         );
     }
 
-    private static DNSSectionAnswer decodeAnswer(ByteBuffer byteBuffer, int numberOfAnswers) {
-        List<DNSSectionAnswer.DNSRecord> records = IntStream.range(0, numberOfAnswers)
+    private static DNSAnswerSection decodeAnswer(ByteBuffer byteBuffer, int numberOfAnswers) {
+        List<DNSAnswerSection.DNSRecord> records = IntStream.range(0, numberOfAnswers)
             .mapToObj(i -> {
                 String labels = decodeLabels(byteBuffer);
                 int queryType = byteBuffer.getShort();
@@ -76,7 +76,7 @@ public class DNSMessageDecoder {
                 int dataLength = byteBuffer.getShort();
                 byte[] data = new byte[dataLength];
                 byteBuffer.get(data);
-                return new DNSSectionAnswer.DNSRecord(
+                return new DNSAnswerSection.DNSRecord(
                     labels,
                     DNSMessage.Type.fromValue(queryType).orElseThrow(),
                     DNSMessage.ClassType.fromValue(queryClass).orElseThrow(),
@@ -86,7 +86,7 @@ public class DNSMessageDecoder {
             })
             .collect(Collectors.toList());
 
-        return new DNSSectionAnswer(records);
+        return new DNSAnswerSection(records);
     }
 
     private static String decodeLabels(ByteBuffer byteBuffer) {
