@@ -2,7 +2,7 @@ import java.nio.ByteBuffer;
 import java.util.BitSet;
 
 public record PacketHeader(
-    short packetIdentifier, boolean qr, byte opcode,
+    short identifier, boolean qr, byte opcode,
     boolean aa, boolean tc, boolean rd, boolean ra,
     byte z, RCode rcode, short qdCount, short anCount,
     short nsCount, short arCount) {
@@ -12,6 +12,7 @@ public record PacketHeader(
 
   public ByteBuffer getHeader() {
     ByteBuffer buffer = ByteBuffer.allocate(BUFFER_CAPACITY);
+
     BitSet flags = new BitSet(FLAG_BITS_CAPACITY);
 
     BitSet opcodeBitSet = BitSet.valueOf(new byte[] {opcode});
@@ -21,19 +22,17 @@ public record PacketHeader(
       flags.set(6 - i, opcodeBitSet.get(3 - i));
     }
 
-    flags.set(2, aa);
-    flags.set(1, tc);
     flags.set(0, rd);
+    flags.set(1, tc);
+    flags.set(2, aa);
 
     // Insert all into buffer
-    buffer.putShort(packetIdentifier);
+    buffer.putShort(identifier);
 
     buffer.put(flags.toByteArray());
 
     BitSet secondFlags = new BitSet(FLAG_BITS_CAPACITY);
-
     secondFlags.set(7, ra);
-
     // Set the reserved bits by DNSEC to 0 ALWAYS
 
     for (int i = 0; i < 3; i++)
