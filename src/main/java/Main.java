@@ -10,8 +10,10 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) {
         final InetSocketAddress forwardAddress = retrieveForwardAddress(args);
-
-        try (final DatagramSocket serverSocket = new DatagramSocket(2053)) {
+        final int UDP_PORT = 2053;
+        try (
+            final DatagramSocket serverSocket = new DatagramSocket(UDP_PORT)
+        ) {
             serverSocket.setReuseAddress(true);
             while(true) {
                 final byte[] buf = new byte[512];
