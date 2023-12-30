@@ -23,7 +23,7 @@ public class Main {
     
         final byte[] bufResponse = new byte[512];
 
-        final var headr = new PacketHeader(
+        final var header = new PacketHeader(
           (short)1234, true, BYTE_ZERO, false, false, false, false, BYTE_ZERO,
           RCode.NO_ERROR, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO
         );
