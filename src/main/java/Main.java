@@ -1,6 +1,13 @@
 import java.io.IOException;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+
+import java.nio.ByteBuffer;
+
+import java.util.List;
+import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args){
@@ -11,7 +18,6 @@ public class Main {
     try(
       DatagramSocket serverSocket = new DatagramSocket(PORT_UDP)
     ) {
-
       while (true) {
         final byte[] buf = new byte[512]; // maximum 512 byte for a packet
 
@@ -19,29 +25,50 @@ public class Main {
 
         serverSocket.receive(packet);
 
-        System.out.println("Received data");
+        System.out.println("Received data " + packet);
 
-        final var header = new DNSHeader(
-          (short)1234, true, BYTE_ZERO, false, false, false, false, BYTE_ZERO,
-          RCode.NO_ERROR, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO
+        DNSHeader header = new DNSHeader();
+
+        header.setID((short)1234);
+        header.setQR(true);
+        header.setQDCOUNT((short)1);
+
+        DNSQuestion questions = new DNSQuestion(
+          "codecrafters.io", DNSQuestionType.A.getValue(),
+          DNSQuestionClass.IN.getValue()
         );
 
-        final var questions = new DNSQuestion("codecrafters.io",
-            DNSQuestionType.A.getValue(), DNSQuestionClass.IN.getValue());
+        DNSMessage message = new DNSMessage(header, questions);
 
-        final var message = new DNSMessage(header.getHeader(), questions);
+        final byte[] bufResponse = message.toBytes();
 
-        final byte[] bufResponse = message.array();
+        DatagramPacket responsePacket = new DatagramPacket(
+          bufResponse, bufResponse.length,
+          packet.getAddress(), packet.getPort()
+        );
 
-        final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
+        serverSocket.send(responsePacket);
 
-        serverSocket.send(packetResponse);
+        System.out.println("Sent data " + responsePacket);
+
+        // final var header = new DNSHeader(
+        //   (short)1234, true, BYTE_ZERO, false, false, false, false, BYTE_ZERO,
+        //   RCode.NO_ERROR, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO
+        // );
+
+        // final var questions = new DNSQuestion("codecrafters.io",
+        //     DNSQuestionType.A.getValue(), DNSQuestionClass.IN.getValue());
+
+        // final var message = new DNSMessage(header.get(), questions);
+
+        // final byte[] bufResponse = message.array();
+
+        // final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
+
+        // serverSocket.send(packetResponse);
       }
-
     } catch (IOException e) {
-
         System.out.println("IOException: " + e.getMessage());
-
     }
   }
 }
