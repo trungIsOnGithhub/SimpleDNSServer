@@ -1,7 +1,7 @@
 import java.util.Arrays;
 import java.util.Optional;
 
-public record DNSSectionHeader(
+public record DNSHeaderSection(
     int packetIdentifier,
     QueryOrResponse queryOrResponse,
     int operationCode,
