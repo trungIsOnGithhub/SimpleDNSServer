@@ -18,7 +18,7 @@ public record DNSQuestion(String domainName,
 
             byte[] labelBytes = new byte[labelLength];
 
-            buffer.get(labelBytes)
+            buffer.get(labelBytes);
 
             domainBuilder.append(
                 new String(labelBytes)
