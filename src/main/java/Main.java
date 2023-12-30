@@ -20,15 +20,13 @@ public class Main {
         serverSocket.receive(packet);
 
         System.out.println("Received data");
-    
-        final byte[] bufResponse = new byte[512];
 
         final var header = new PacketHeader(
           (short)1234, true, BYTE_ZERO, false, false, false, false, BYTE_ZERO,
           RCode.NO_ERROR, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO
         );
 
-        final byte[] bufResponse2 = header.getHeader().array();
+        final byte[] bufResponse = header.getHeader().array();
 
         final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
 
