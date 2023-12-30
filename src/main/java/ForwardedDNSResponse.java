@@ -23,7 +23,7 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
     @Override
     public DNSMessage getResponseMessage(DNSMessage questionMessage) throws IOException {
         List<DNSMessage> responses = new ArrayList<>();
-        for (DNSSectionQuestion.DNSQuestion question : questionMessage.question().questions()) {
+        for (DNSQuestionSection.DNSQuestion question : questionMessage.question().questions()) {
             DNSMessage responseMessage = getResponseForQuestion(questionMessage.header(), question);
             responses.add(responseMessage);
         }
@@ -38,10 +38,10 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
         );
     }
 
-    private DNSMessage getResponseForQuestion(DNSHeaderSection headerQuestion, DNSSectionQuestion.DNSQuestion question) throws IOException {
+    private DNSMessage getResponseForQuestion(DNSHeaderSection headerQuestion, DNSQuestionSection.DNSQuestion question) throws IOException {
         DNSMessage message = new DNSMessage(
             cloneForOneQuestion(headerQuestion),
-            new DNSSectionQuestion(Collections.singletonList(question)),
+            new DNSQuestionSection(Collections.singletonList(question)),
             new DNSAnswerSection(Collections.emptyList())
         );
         System.out.println("Forward(" + forwardAddress + ") : " + message);

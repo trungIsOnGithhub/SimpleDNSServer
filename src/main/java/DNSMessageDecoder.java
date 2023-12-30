@@ -10,7 +10,7 @@ public class DNSMessageDecoder {
     public static DNSMessage decode(byte[] buffer) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
         DNSHeaderSection header = decodeHeader(byteBuffer);
-        DNSSectionQuestion question = decodeQuestion(byteBuffer, header.questionCount());
+        DNSQuestionSection question = decodeQuestion(byteBuffer, header.questionCount());
         DNSAnswerSection answer = decodeAnswer(byteBuffer, header.answerCount());
 
         return new DNSMessage(header, question, answer);
@@ -50,14 +50,14 @@ public class DNSMessageDecoder {
         );
     }
 
-    private static DNSSectionQuestion decodeQuestion(ByteBuffer byteBuffer, int numberOfQuestions) {
-        return new DNSSectionQuestion(
+    private static DNSQuestionSection decodeQuestion(ByteBuffer byteBuffer, int numberOfQuestions) {
+        return new DNSQuestionSection(
             IntStream.range(0, numberOfQuestions)
                 .mapToObj(i -> {
                     String labels = decodeLabels(byteBuffer);
                     final int queryType = byteBuffer.getShort();
                     final int queryClass = byteBuffer.getShort();
-                    return new DNSSectionQuestion.DNSQuestion(
+                    return new DNSQuestionSection.DNSQuestion(
                         labels,
                         DNSMessage.Type.fromValue(queryType).orElseThrow(),
                         DNSMessage.ClassType.fromValue(queryClass).orElseThrow()

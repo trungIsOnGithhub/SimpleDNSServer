@@ -3,7 +3,7 @@ import java.util.Optional;
 
 public record DNSMessage(
     DNSHeaderSection header,
-    DNSSectionQuestion question,
+    DNSQuestionSection question,
     DNSAnswerSection answer
 ) {
     public enum Type {

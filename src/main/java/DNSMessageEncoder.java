@@ -31,8 +31,8 @@ public class DNSMessageEncoder {
         byteBuffer.putShort((short) header.additionalRecordCount());
     }
 
-    private static void encodeQuestionSection(ByteBuffer byteBuffer, DNSSectionQuestion questionSection) {
-        for (DNSSectionQuestion.DNSQuestion question : questionSection.questions()) {
+    private static void encodeQuestionSection(ByteBuffer byteBuffer, DNSQuestionSection questionSection) {
+        for (DNSQuestionSection.DNSQuestion question : questionSection.questions()) {
             encodeLabels(byteBuffer, question.labels());
             byteBuffer.putShort((short) question.type().value);
             byteBuffer.putShort((short) question.classType().value);
