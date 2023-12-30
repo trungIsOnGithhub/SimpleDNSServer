@@ -18,9 +18,11 @@ public record DNSQuestion(String domainName,
 
             byte[] labelBytes = new byte[labelLength];
 
+            buffer.get(labelBytes)
+
             domainBuilder.append(
-                new String(buffer.get(labelBytes)
-            ));
+                new String(labelBytes)
+            );
         }
 
         short qType = buffer.getShort();
