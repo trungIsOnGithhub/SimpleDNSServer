@@ -21,12 +21,17 @@ public class Main {
 
         System.out.println("Received data");
 
-        final var header = new PacketHeader(
+        final var header = new DNSHeader(
           (short)1234, true, BYTE_ZERO, false, false, false, false, BYTE_ZERO,
           RCode.NO_ERROR, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO, SHORT_ZERO
         );
 
-        final byte[] bufResponse = header.getHeader().array();
+        final var questions = new DNSQuestion("codecrafters.io",
+            DNSQuestionType.A.getValue(), DNSQuestionClass.IN.getValue());
+
+        final var message = new DNSMessage(header.getHeader(), questions);
+
+        final byte[] bufResponse = message.array();
 
         final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
 

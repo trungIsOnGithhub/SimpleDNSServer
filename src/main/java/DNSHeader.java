@@ -1,7 +1,7 @@
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
-public record PacketHeader(
+public record DNSHeader(
     short identifier, boolean qr, byte opcode,
     boolean aa, boolean tc, boolean rd, boolean ra,
     byte z, RCode rcode, short qdCount, short anCount,
