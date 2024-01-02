@@ -11,3 +11,6 @@ various record types (A, AAAA, CNAME, etc) and more.
 
 **Note**: If you're viewing this repo on GitHub, head over to
 [codecrafters.io](https://codecrafters.io) to try the challenge.
+
+[![progress-banner](https://backend.codecrafters.io/progress/dns-server/f1da2dcb-5fc8-48e1-b942-106c70864fb0)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+#### Link to C++ Solution for [Simple HTTP Server](https://github.com/trungIsOnGithhub/HttpServerCpp)
