@@ -11,24 +11,30 @@ public class Main {
     public static void main(String[] args) {
         final InetSocketAddress forwardAddress = retrieveForwardAddress(args);
         final int UDP_PORT = 2053;
-        try (
-            final DatagramSocket serverSocket = new DatagramSocket(UDP_PORT)
-        ) {
+        try ( final DatagramSocket serverSocket = new DatagramSocket(UDP_PORT) ) {
             serverSocket.setReuseAddress(true);
+
             while(true) {
                 final byte[] buf = new byte[512];
                 final DatagramPacket packet = new DatagramPacket(buf, buf.length);
+
                 serverSocket.receive(packet);
 
                 final DNSMessage questionMessage = DNSMessageDecoder.decode(buf);
+
                 System.out.println("OriginalRequest(" + packet.getSocketAddress() + ") : " + questionMessage);
 
                 final DNSResponseRetriever responseRetriever = createDNSResponseRetriever(forwardAddress, serverSocket);
-                final DNSMessage responseMessage = responseRetriever.getResponseMessage(questionMessage);
-                System.out.println("FinalResponse(" + packet.getSocketAddress() + ") : " + responseMessage);
 
+                final DNSMessage responseMessage = responseRetriever.getResponseMessage(questionMessage);
+
+                System.out.println("FinalResponse(" + packet.getSocketAddress() + ") : " + responseMessage);
+                
+                // We encode in DNS Response Message
                 byte[] bufResponse = DNSMessageEncoder.encode(responseMessage);
+
                 DatagramPacket responsePacket = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
+
                 serverSocket.send(responsePacket);
             }
         } catch (IOException e) {

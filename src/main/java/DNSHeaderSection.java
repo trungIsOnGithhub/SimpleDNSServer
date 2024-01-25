@@ -21,6 +21,7 @@ public record DNSHeaderSection(
         RESPONSE(1);
 
         public final int value;
+
         QueryOrResponse(int value) {
             this.value = value;
         }

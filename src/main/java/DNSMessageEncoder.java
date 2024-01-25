@@ -1,12 +1,13 @@
 import java.nio.ByteBuffer;
 
 public class DNSMessageEncoder {
-
     public static byte[] encode(DNSMessage message) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[512]);
+
         encodeHeaderSection(byteBuffer, message.header());
         encodeQuestionSection(byteBuffer, message.question());
         encodeAnswerSection(byteBuffer, message.answer());
+
         byte[] result = new byte[byteBuffer.position()];
         byteBuffer.rewind().get(result);
 
@@ -15,6 +16,7 @@ public class DNSMessageEncoder {
 
     private static void encodeHeaderSection(ByteBuffer byteBuffer, DNSHeaderSection header) {
         byteBuffer.putShort((short) header.packetIdentifier());
+
         int byteToStore = header.queryOrResponse().value << 7;
         byteToStore |= (header.operationCode() << 3);
         byteToStore |= (header.authoritativeAnswer() << 2);
@@ -24,7 +26,9 @@ public class DNSMessageEncoder {
         byteToStore = header.recursionAvailable() << 7;
         byteToStore |= (header.reserved() << 4);
         byteToStore |= header.error();
+
         byteBuffer.put((byte) byteToStore);
+
         byteBuffer.putShort((short) header.questionCount());
         byteBuffer.putShort((short) header.answerCount());
         byteBuffer.putShort((short) header.nameserverCount());

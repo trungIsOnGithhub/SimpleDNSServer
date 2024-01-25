@@ -12,6 +12,7 @@ public class Respond {
             while(true) {
                 final byte[] buf = new byte[512];
                 final DatagramPacket packet = new DatagramPacket(buf, buf.length);
+
                 serverSocket.receive(packet);
 
                 final DNSMessage questionMessage = DNSMessageDecoder.decode(buf);
@@ -20,6 +21,7 @@ public class Respond {
                 final DNSMessage responseMessage = new SimpleDNSResponse().getResponseMessage(questionMessage);
 
                 System.out.println("Response data : " + responseMessage);
+
                 byte[] bufResponse = DNSMessageEncoder.encode(responseMessage);
 
                 final DatagramPacket packetResponse = new DatagramPacket(bufResponse, bufResponse.length, packet.getSocketAddress());
