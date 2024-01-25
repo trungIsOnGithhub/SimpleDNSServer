@@ -23,14 +23,17 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
     @Override
     public DNSMessage getResponseMessage(DNSMessage questionMessage) throws IOException {
         List<DNSMessage> responses = new ArrayList<>();
-        for (DNSQuestionSection.DNSQuestion question : questionMessage.question().questions()) {
+
+        for (var question : questionMessage.question().questions()) {
             DNSMessage responseMessage = getResponseForQuestion(questionMessage.header(), question);
+
             responses.add(responseMessage);
         }
 
         List<DNSAnswerSection.DNSRecord> answers = responses.stream()
             .flatMap(r -> r.answer().records().stream())
             .collect(Collectors.toList());
+
         return new DNSMessage(
             cloneWithSpecifiedAnswers(questionMessage.header(), responses),
             questionMessage.question(),
@@ -44,16 +47,24 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
             new DNSQuestionSection(Collections.singletonList(question)),
             new DNSAnswerSection(Collections.emptyList())
         );
+
         System.out.println("Forward(" + forwardAddress + ") : " + message);
+
         final byte[] queryBuffer = DNSMessageEncoder.encode(message);
+
         DatagramPacket packet = new DatagramPacket(queryBuffer, queryBuffer.length, forwardAddress);
+
         serverSocket.send(packet);
 
         final byte[] responseBuffer = new byte[512];
         final DatagramPacket responseFromForward = new DatagramPacket(responseBuffer, responseBuffer.length);
+
         serverSocket.receive(responseFromForward);
+
         DNSMessage responseMessage = DNSMessageDecoder.decode(responseFromForward.getData());
+
         System.out.println("Receive(" + responseFromForward.getSocketAddress() + ") : " + responseMessage);
+
         return responseMessage;
     }
 
@@ -74,6 +85,7 @@ public class ForwardedDNSResponse implements DNSResponseRetriever {
 
     private DNSHeaderSection cloneWithSpecifiedAnswers(DNSHeaderSection header, List<DNSMessage> answers) {
         List<DNSHeaderSection> responseHeaders = answers.stream().map(DNSMessage::header).toList();
+
         return new DNSHeaderSection(
             header.packetIdentifier(),
             DNSHeaderSection.QueryOrResponse.RESPONSE,

@@ -79,11 +79,14 @@ public class DNSMessageDecoder {
         List<DNSAnswerSection.DNSRecord> records = IntStream.range(0, numberOfAnswers)
             .mapToObj(i -> {
                 String labels = decodeLabels(byteBuffer);
+
                 int queryType = byteBuffer.getShort();
                 int queryClass = byteBuffer.getShort();
                 int ttl = byteBuffer.getInt();
                 int dataLength = byteBuffer.getShort();
+
                 byte[] data = new byte[dataLength];
+
                 byteBuffer.get(data);
                 return new DNSAnswerSection.DNSRecord(
                     labels,
@@ -122,6 +125,6 @@ public class DNSMessageDecoder {
 
         } while (0 < labelLength && (labelLength >> 6) != 0b11);
 
-        return String.join(".", labels);
+        return String.join(".", labels); // join to become domain
     }
 }
