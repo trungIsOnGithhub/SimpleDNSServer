@@ -1,4 +1,6 @@
-#### Link to C++ Solution for [Simple HTTP Server](https://github.com/trungIsOnGithhub/HttpServerCpp)
+##### Computer Network - Semester 222
+
+> Developed with Java Oracle JDK 17, VS Code Editor(No IDE).
 
 This is a Java solutions to the
 ["Build Your Own DNS server" Challenge](https://app.codecrafters.io/courses/dns-server/overview).
